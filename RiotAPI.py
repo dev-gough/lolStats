@@ -14,6 +14,9 @@ class RiotAPI():
         load_dotenv()
 
         self.api_key = os.getenv("RIOT_API")
+        self.challenge_config = None
+
+        self._update_challenge_config()
 
     def _handle_req(self,req) -> dict:
         """ handles requests to riots rest api"""
@@ -33,6 +36,45 @@ class RiotAPI():
             print(f"something else: {code}")
         
         return response
+    
+    def _update_challenge_config(self):
+        """ gathers challenge configuration info 
+        
+            api calls: 1
+
+            returns:
+                [
+                    {
+                        id: int,
+                        localizedNames: {
+                            en_US: {
+                                description: string,
+                                name: string,
+                                shortDescription: string
+                            },
+                        },
+                        state: string,
+                        leaderboard: bool,
+                        thresholds: {
+                            "IRON": int,
+                            "BRONZE": int,
+                            "SILVER": int,
+                            "GOLD": int,
+                            "PLATINUM": int,
+                            "DIAMOND": int,
+                            "MASTER": int,
+                            "GRANDMASTER": int,
+                            "CHALLENGER": int
+                        }
+                    },
+                ]
+
+            for now I care about localizedNames, but in the future I will
+            implement thresholds in some sort of GUI
+        """
+
+        self.challenge_config = self._handle_req('https://na1.api.riotgames.com/lol/challenges/v1/challenges/config').json()
+
 
     def get_summoner_by_name(self, name: str) -> dict:
         """ gets summoner data
@@ -134,6 +176,6 @@ class RiotAPI():
         return data
 
     def get_challenge_total_points(self, name: str) -> int:
-        """ returns total challenge points for a summoner name"""
-        points = self.get_challenge_data_by_summoner_name(name)['totalPoints']
-        return points['current']
+        """ returns sum of challenge points for a summoner name"""
+        challenges = self.get_challenge_data_by_summoner_name(name)['challenges']
+        return np.sum([x['value'] for x in challenges])

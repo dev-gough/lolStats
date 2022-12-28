@@ -16,6 +16,22 @@ def setup_db():
     j = r.get_challenge_data_for_sql(NAME)
     s.insert(j)
 
+def print_values(old, new, i, verbose=False):
+
+    config = r.challenge_config
+    challenge = [x for x in config if x['id'] == old[i][0]][0]
+    
+    print(challenge['localizedNames']['en_US']['name'])
+    print(challenge['localizedNames']['en_US']['shortDescription'])
+
+    if verbose:
+        print(f"Challenge ID: {old[i][0]}")
+        print(f"Old value: {old[i][3]}")
+        print(f"New value: {new[i][3]}")
+
+    print(f"Difference: +{new[i][3] - old[i][3]}")
+    print('--------------------------------')
+
 def handle_update():
     """ updates database file with new values
 
@@ -34,20 +50,17 @@ def handle_update():
     if len(old) != len(new):
         print("new challenge added?")
     
-    # iterate thru each element to update
+    # iterate through each element to update
     for i in range(len(old)):
         if old[i][0] != new[i][0]:
             raise Exception("Not comparing the same ID.")
 
         if old[i][3] != new[i][3]:
-            print(f"Challenge ID: {old[i][0]}")
-            print(f"Old value: {old[i][3]}")
-            print(f"New value: {new[i][3]}")
-            print(f"Difference: {new[i][3] - old[i][3]}")
-
+            print_values(old,new,i)
             data = shift_tuple(new[i])
             s.update(data)
-
+    
+    return r.get_challenge_total_points(NAME)
     
 def checker_loop(iters=None, interval=60):
     """ main function loop 
@@ -66,7 +79,7 @@ def checker_loop(iters=None, interval=60):
         check = r.get_challenge_total_points(NAME)
         print(f"Old: {total_points}\nNew: {check}\n")
         if total_points != check:
-            handle_update()
+            total_points = handle_update()
 
         time.sleep(interval)
         i += 1
