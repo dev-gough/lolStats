@@ -6,15 +6,28 @@ from SQLiteHandler import SQLiteHandler
 NAME = 'devy10'
 
 def shift_tuple(t: tuple):
+    """ shifts a tuple left one, with index 0 wrapping to -1 """
     temp = list(t)
     temp[:] = temp[1:] + [temp[0]]
     return temp
 
 def setup_db():
+    """" completes the initial setup of the database """
     j = r.get_challenge_data_for_sql(NAME)
     s.insert(j)
 
 def handle_update():
+    """ updates database file with new values
+
+        both old and new are of form [(id,percentile,level,value,achievedTime),(),...]
+    
+        old data gets read from the database, and the new data comes from the RiotAPI
+
+        the function then just loops through, comparing each value (index 3)
+
+        when the values differ, the table gets updated with the new value, which needs to be shifted
+        to the left one index, such that id is at the last index (percentile,level,value,achievedTime,id)
+    """
     old = s.get_data()
     new = r.get_challenge_data_for_sql(NAME)
 
@@ -37,6 +50,12 @@ def handle_update():
 
     
 def checker_loop(iters=None, interval=60):
+    """ main function loop 
+
+        checks every `interval` seconds if there needs to be an update
+
+        if the total points differ, then a challenge must've progressed, so run update
+    """
     i = 0
     total_points = r.get_challenge_total_points(NAME)
     while True:

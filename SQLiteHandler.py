@@ -1,6 +1,7 @@
 import sqlite3
 
 class SQLiteHandler():
+    """ handles all database management"""
     
     def __init__(self, database_file: str) -> None:
         self.database_file = database_file
@@ -14,6 +15,11 @@ class SQLiteHandler():
         self.con.commit()
 
     def insert(self, data: tuple):
+        """ insert data tuple into database
+        
+            parameters:
+                data (tuple): of form (id,percentile,level,value,achievedTime)
+        """
         if type(data) == list :
             try:
                 self._insert_many(data)
@@ -28,7 +34,7 @@ class SQLiteHandler():
         """ updates a challege value
 
             parameters:
-                data (tuple): of form (percentile, level, value, achievedTime, id)
+                data (tuple): of form (percentile,level,value,achievedTime)
         
         """
         sql = """UPDATE challenge
@@ -43,5 +49,12 @@ class SQLiteHandler():
 
     
     def get_data(self) -> dict:
+        """ returns all challenge data from database
+        
+            returns:
+                [
+                    (id,percentage,level,value,achievedTime),
+                ]
+        """
         res = self.cur.execute("SELECT * FROM challenge")
         return res.fetchall()
