@@ -48,7 +48,7 @@ class SQLiteHandler():
         self.con.commit()
 
     
-    def get_data(self) -> dict:
+    def get_data(self) -> list:
         """ returns all challenge data from database
         
             returns:

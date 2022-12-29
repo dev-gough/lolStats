@@ -16,6 +16,11 @@ def setup_db():
     j = r.get_challenge_data_for_sql(NAME)
     s.insert(j)
 
+def _debug_to_file(old, new):
+    with open("debug.txt", "w") as f:
+        f.write(old)
+        f.write(new)
+
 def print_values(old, new, i, verbose=False):
 
     config = r.challenge_config
@@ -49,6 +54,8 @@ def handle_update():
 
     if len(old) != len(new):
         print("new challenge added?")
+        _debug_to_file(old,new)
+        
     
     # iterate through each element to update
     for i in range(len(old)):
@@ -92,3 +99,4 @@ if __name__ == '__main__':
 
     setup_db()
     checker_loop()
+    
